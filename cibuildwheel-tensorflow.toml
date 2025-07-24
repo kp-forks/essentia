@@ -1,3 +1,11 @@
+[tool.cibuildwheel]
+
+before-all = [
+  # Monkey-patch package name. We could have a separate pyproject.toml configuration, but the build backend does not accept custom configuration filepaths.
+  "sed -i 's/^name *= *\"essentia\"$/name = \"essentia-tensorflow\"/' pyproject.toml"
+]
+
+
 [tool.cibuildwheel.linux]
 
 manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
@@ -13,7 +21,7 @@ before-all = [
   "PYBIN=/opt/python/cp36-cp36m/bin/",
   "\"${PYBIN}/python\" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "\"${PYBIN}/python\" waf",
-  "\"${PYBIN}/python\" waf install"
+  "\"${PYBIN}/python\" waf install",
 ]
 
 test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
@@ -95,24 +103,4 @@ repair-wheel-command = [
   "cp /opt/homebrew/opt/sdl2/lib/libSDL2*.dylib {dest_dir}/essentia/.dylibs",
   "wheel_rel=$(echo {wheel} | grep -o '[^/]*$')",
   "cd {dest_dir} && zip -u {dest_dir}/$wheel_rel essentia/.dylibs/*"
-]
-
-
-[build-system]
-requires = [
-    "wheel >= 0.29.0",
-    "setuptools >= 48",
-    "numpy>=2.0.0rc1",
-    "six",
-]
-build-backend = "setuptools.build_meta"
-
-[project]
-name="essentia-tensorflow"
-license = "AGPL-3.0-only"
-dynamic = ["version", "description", "readme", "authors", "keywords", "classifiers", "urls"]
-dependencies = [
-    "numpy>=1.25",
-    "pyyaml",
-    "six",
 ]
